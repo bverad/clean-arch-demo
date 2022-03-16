@@ -1,52 +1,18 @@
-def projectName="Api-clientes-canonico"
-def branch="master" //ESTO DEBERIA SER LA RAMA DEVELOP
 pipeline {
-    environment {
-        imagename= "api-clientes-canonico"
-        projectOkd= "api-clientes-canonico"
-        registryCredential = "nexus-credencial"
-        dockerImage = ""
-        okd = "192.168.2.131"
-        //urlsite = "" 
-    }
-    agent any
-     stages {
-        stage('Compilar Java') {
-      steps{
-        script {
-          sh "mvn clean install"
-        }
-      }
-    }
-    
-    stage('Inspeccion Codigo') {
+  agent { label 'linux' }
+  options {
+    buildDiscarder(logRotator(numToKeepStr: '5'))
+  }
+  stages {
+    stage('Build') {
       steps {
-        script {      
-        // requires SonarQube Scanner 2.8+
-       //scannerHome = tool 'SonarQubeScanner' type: 'hudson.plugins.sonar.SonarRunnerInstallation'
-          scannerHome = tool 'SonarQubeScanner'
-        }
-        withSonarQubeEnv('SonarQubeAIT') {
-          sh "${scannerHome}/bin/sonar-scanner -Dsonar.sources=src/main/java/ -Dsonar.java.binaries=. -Dsonar.host.url=http://192.168.2.151:9000 -Dsonar.projectKey=${projectName} -Dsonar.projectName=${projectName} -Dsonar.projectVersion=1.0 -Dsonar.language=java"            
-        }
+        sh 'docker build -t bverad/clean-arch-demo:latest .'
       }
     }
-
     stage('Scan') {
       steps {
-        sh 'trivy --no-progress --exit-code 1 --severity HIGH,CRITICAL darinpope/java-web-app:latest'
+        sh 'trivy --no-progress --exit-code 1 --severity HIGH,CRITICAL bverad/clean-arch-demo:latest'
       }
     }
-    
-      
-    stage('Limpieza') {
-      steps{
-        cleanWs()
-
-      }
-    }
-        
-  
-  
- }
+  }
 }
