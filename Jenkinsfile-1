@@ -4,7 +4,6 @@ pipeline {
     buildDiscarder(logRotator(numToKeepStr: '5'))
   }
 
-  agent any
   stages {
     stage('Compilar Java') {
         steps {
