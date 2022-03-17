@@ -5,13 +5,6 @@ pipeline {
   }
 
   stages {
-    stage('Compilar Java') {
-        steps {
-          script {
-            sh "mvn clean install"
-          }
-        }
-    }
 
     stage('Build') {
       steps {
